@@ -87,7 +87,17 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
 
 
 
-
+@app.get("/reportes/")
+def reportes_eventos(db: Session = Depends(get_db), current_user: models.Usuario = Depends(get_current_user)):
+    """
+    Genera un resumen de los eventos:
+    - total de eventos registrados
+    - suma de cupos disponibles
+    - cantidad de eventos agotados
+    Solo accesible para usuarios autenticados.
+    """
+    reporte = crud.generar_reporte_eventos(db)
+    return reporte
 @app.post("/eventos/", response_model=schemas.Evento)
 def crear_evento(
     evento: schemas.EventoCreate, 

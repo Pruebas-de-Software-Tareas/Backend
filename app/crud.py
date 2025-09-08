@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from . import models, schemas
 from sqlalchemy.orm import Session
@@ -12,6 +13,17 @@ def crear_evento(db: Session, evento: schemas.EventoCreate):
 
 def obtener_eventos(db: Session):
     return db.query(models.Evento).all()
+
+def generar_reporte_eventos(db: Session):
+    total_eventos = db.query(func.count(models.Evento.id)).scalar()  
+    suma_cupos = db.query(func.sum(models.Evento.cupos_disponibles)).scalar()  
+    eventos_agotados = db.query(func.count(models.Evento.id)).filter(models.Evento.cupos_disponibles == 0).scalar()  
+
+    return {
+        "total_eventos": total_eventos,
+        "suma_cupos_disponibles": suma_cupos or 0,
+        "eventos_agotados": eventos_agotados
+    }
 
 def get_user_by_username(db: Session, username: str):
     """Busca un usuario por su nombre de usuario."""
