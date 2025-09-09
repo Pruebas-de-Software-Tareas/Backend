@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from . import models, schemas
 from sqlalchemy.orm import Session
 from . import models, schemas, security
-#ejemplo simple para el crud, es para parobar si es que funciona la base
+
 def crear_evento(db: Session, evento: schemas.EventoCreate):
     db_evento = models.Evento(**evento.dict())
     db.add(db_evento)
@@ -13,6 +13,24 @@ def crear_evento(db: Session, evento: schemas.EventoCreate):
 
 def obtener_eventos(db: Session):
     return db.query(models.Evento).all()
+
+def actualizar_evento(db: Session, evento_id: int, evento: schemas.EventoCreate):
+    db_evento = db.query(models.Evento).filter(models.Evento.id == evento_id).first()
+    if not db_evento:
+        return None
+    for key, value in evento.dict().items():
+        setattr(db_evento, key, value)
+    db.commit()
+    db.refresh(db_evento)
+    return db_evento
+
+def eliminar_evento(db: Session, evento_id: int):
+    db_evento = db.query(models.Evento).filter(models.Evento.id == evento_id).first()
+    if not db_evento:
+        return None
+    db.delete(db_evento)
+    db.commit()
+    return True
 
 def generar_reporte_eventos(db: Session):
     total_eventos = db.query(func.count(models.Evento.id)).scalar()  
