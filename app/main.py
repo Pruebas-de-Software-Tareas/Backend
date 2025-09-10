@@ -1,3 +1,4 @@
+from ast import List
 from fastapi import FastAPI, Depends
 from fastapi import security
 from sqlalchemy.orm import Session
@@ -106,6 +107,20 @@ def crear_evento(
 ):
     
     return crud.crear_evento(db=db, evento=evento)
+
+@app.put("/eventos/{evento_id}", response_model=schemas.Evento)
+def actualizar_evento_endpoint(evento_id: int, evento: schemas.EventoCreate, db: Session = Depends(get_db)):
+    actualizado = crud.actualizar_evento(db, evento_id, evento)
+    if not actualizado:
+        raise HTTPException(status_code=404, detail="Evento no encontrado")
+    return actualizado
+
+@app.delete("/eventos/{evento_id}")
+def eliminar_evento_endpoint(evento_id: int, db: Session = Depends(get_db)):
+    eliminado = crud.eliminar_evento(db, evento_id)
+    if not eliminado:
+        raise HTTPException(status_code=404, detail="Evento no encontrado")
+    return {"message": "Evento eliminado"}
 
 @app.get("/eventos/")
 def leer_eventos(db: Session = Depends(get_db)):
